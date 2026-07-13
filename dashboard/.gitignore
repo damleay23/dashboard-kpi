@@ -39,5 +39,6 @@ listar_*.py
 verificar_*.py
 *.xlsx
 *.zip
-# No subir datos.js a Vercel (muy grande)
-public/datos.js
+# No subir datos.js a Vercel (muy grande) - EXCEPTO en public/
+datos.js
+!public/datos.js
