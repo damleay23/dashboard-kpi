@@ -1,0 +1,13 @@
+{
+  "name": "dashboard-kpi",
+  "version": "1.0.0",
+  "description": "Dashboard KPI - Análisis de Cotizaciones",
+  "main": "index.html",
+  "scripts": {
+    "dev": "python servidor.py",
+    "build": "echo 'Static site - no build needed'"
+  },
+  "keywords": ["kpi", "dashboard", "cotizaciones"],
+  "author": "",
+  "license": "MIT"
+}
