@@ -1,0 +1,16 @@
+node_modules
+.git
+.env
+.env.local
+*.pyc
+__pycache__
+venv
+KPI
+datos_dashboard
+datos_limpios
+*.py
+*.xlsx
+*.csv
+.vscode
+.DS_Store
+hand-tracking
