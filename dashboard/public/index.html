@@ -392,17 +392,31 @@
         };
 
         function cargarDatos() {
-            if (typeof DATOS_DASHBOARD === 'undefined') {
-                setTimeout(cargarDatos, 300);
+            // Intentar cargar de la ventana global primero (si está disponible)
+            if (typeof DATOS_DASHBOARD !== 'undefined') {
+                datos = DATOS_DASHBOARD;
+                console.log('Datos cargados desde global');
+                actualizarMetricas();
+                llenarFiltros();
+                actualizarDatos();
                 return;
             }
-
-            datos = DATOS_DASHBOARD;
-            console.log('Datos cargados exitosamente:', datos);
             
-            actualizarMetricas();
-            llenarFiltros();
-            actualizarDatos();
+            // Si no, intentar cargar desde una API/servidor
+            fetch('/api/datos')
+                .then(r => r.json())
+                .then(d => {
+                    datos = d;
+                    console.log('Datos cargados desde API');
+                    actualizarMetricas();
+                    llenarFiltros();
+                    actualizarDatos();
+                })
+                .catch(err => {
+                    console.error('Error cargando datos:', err);
+                    // Mostrar mensaje de error
+                    document.querySelector('.metrics').innerHTML = '<div style="grid-column: 1/-1; padding: 20px; text-align: center; color: red;"><strong>Error: No se pudieron cargar los datos. Por favor, recarga la página.</strong></div>';
+                });
         }
 
         function actualizarMetricas() {
