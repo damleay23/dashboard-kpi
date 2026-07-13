@@ -39,6 +39,6 @@ listar_*.py
 verificar_*.py
 *.xlsx
 *.zip
-# Archivos grandes
+# Archivos grandes - PERMITIR en public/
 datos.js
-public/datos*.js
+!public/datos.js
