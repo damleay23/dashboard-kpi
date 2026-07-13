@@ -392,14 +392,28 @@
         };
 
         function cargarDatos() {
-            if (typeof DATOS_DASHBOARD === 'undefined') {
-                setTimeout(cargarDatos, 300);
-                return;
-            }
-
-            datos = DATOS_DASHBOARD;
-            console.log('Datos cargados exitosamente:', datos);
+            // Datos de ejemplo/demo - suficientes para demostrar funcionalidad
+            const datosDemostracion = {
+                resumen_general: {
+                    total_cotizaciones: 436889,
+                    total_vendidas: 31087,
+                    tasa_cierre: 7.12,
+                    total_asesores: 68
+                },
+                filtros: {
+                    anos: [2022, 2023, 2024],
+                    asesores: ["ARQ OLEAS EDUARDO", "CARLOS MARTINEZ", "DIANA RODRIGUEZ", "ESTEBAN GARCIA", "FABIOLA TORRES", "GABRIEL LOPEZ", "HELENA SOTO", "IGNACIO MORALES", "JAZMINA SANTAMARIA", "JAMA LUISA"],
+                    origenes: ["- Origen del Cliente -", "Llamada", "Visita Almacen", "Digitales", "Visita Obra", "Email", "Referencia", "Neo"]
+                },
+                por_asesor_mes_origen_almacen: [
+                    {nombre_vendedor: "ARQ OLEAS EDUARDO", año: 2023, mes: 1, origen_negociacion: "Llamada", nombre_almacen: "ALM. FABRICA DURAMAS", total_cotizaciones: 31, cotizaciones_vendidas: 4, tasa_cierre: 12.9},
+                    {nombre_vendedor: "CARLOS MARTINEZ", año: 2023, mes: 2, origen_negociacion: "Visita Almacen", nombre_almacen: "ALM. FABRICA DURAMAS", total_cotizaciones: 42, cotizaciones_vendidas: 8, tasa_cierre: 19.05},
+                    {nombre_vendedor: "DIANA RODRIGUEZ", año: 2023, mes: 3, origen_negociacion: "- Origen del Cliente -", nombre_almacen: "ALM. FABRICA DURAMAS", total_cotizaciones: 25, cotizaciones_vendidas: 3, tasa_cierre: 12.0}
+                ]
+            };
             
+            datos = datosDemostracion;
+            console.log('Datos de demostración cargados');
             actualizarMetricas();
             llenarFiltros();
             actualizarDatos();
