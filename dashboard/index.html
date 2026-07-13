@@ -77,12 +77,6 @@
             color: #1f497d;
         }
 
-        .metric-card .percentage {
-            color: #2d5aa8;
-            font-size: 32px;
-            font-weight: 700;
-        }
-
         .controls {
             background: white;
             padding: 20px;
@@ -98,6 +92,7 @@
         .control-group {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .control-group label {
@@ -108,7 +103,6 @@
         }
 
         .controls select,
-        .controls input,
         .controls button {
             padding: 10px 12px;
             border: 1px solid #ddd;
@@ -119,11 +113,64 @@
             color: #333;
         }
 
-        .controls select:focus,
-        .controls input:focus {
+        .controls input[type="text"] {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+            color: #333;
+            width: 100%;
+        }
+
+        .controls input[type="text"]:focus {
             outline: none;
             border-color: #1f497d;
             box-shadow: 0 0 0 2px rgba(31, 73, 125, 0.1);
+        }
+
+        #asesorSugerencias {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+            z-index: 1000;
+        }
+
+        #asesorSugerencias div {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #asesorSugerencias div:hover {
+            background: #f0f0f0;
+        }
+
+        #asesorSugerencias {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #asesorSugerencias div {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+
+        #asesorSugerencias div:hover {
+            background: #f0f0f0;
         }
 
         .button-group {
@@ -220,35 +267,15 @@
             color: #2d5aa8;
             font-weight: 600;
         }
-
-        @media (max-width: 768px) {
-            .metrics {
-                grid-template-columns: 1fr;
-            }
-
-            .chart-wrapper {
-                height: 300px;
-            }
-
-            .controls {
-                grid-template-columns: 1fr;
-            }
-
-            .button-group {
-                grid-column: 1 / -1;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>Dashboard KPI - Análisis de Cotizaciones</h1>
-            <p>Seguimiento mensual de cotizaciones por asesor y tasa de cierre porcentual</p>
+            <p>Seguimiento de cotizaciones por asesor, origen y tasa de cierre</p>
         </div>
 
-        <!-- Métricas Generales -->
         <div class="metrics">
             <div class="metric-card">
                 <h3>Total de Cotizaciones</h3>
@@ -260,7 +287,7 @@
             </div>
             <div class="metric-card">
                 <h3>Tasa de Cierre General</h3>
-                <div class="percentage" id="metricTasaCierre">-</div>
+                <div class="value" id="metricTasaCierre">-</div>
             </div>
             <div class="metric-card">
                 <h3>Total de Asesores</h3>
@@ -268,26 +295,18 @@
             </div>
         </div>
 
-        <!-- Controles -->
         <div class="controls">
-            <div class="control-group">
-                <label>Asesor:</label>
-                <select id="asesorFilter" onchange="actualizarDatos()">
-                    <option value="">Todos los Asesores</option>
-                </select>
-            </div>
-
             <div class="control-group">
                 <label>Año:</label>
                 <select id="anoFilter" onchange="actualizarDatos()">
-                    <option value="">Todos los Años</option>
+                    <option value="">Todos</option>
                 </select>
             </div>
 
             <div class="control-group">
                 <label>Mes:</label>
                 <select id="mesFilter" onchange="actualizarDatos()">
-                    <option value="">Todos los Meses</option>
+                    <option value="">Todos</option>
                     <option value="1">Enero</option>
                     <option value="2">Febrero</option>
                     <option value="3">Marzo</option>
@@ -303,131 +322,108 @@
                 </select>
             </div>
 
+            <div class="control-group">
+                <label>Asesor:</label>
+                <input type="text" id="asesorFilter" placeholder="Buscar asesor..." oninput="filtrarAsesor()">
+                <select id="asesorSelect" style="margin-top:6px;display:none" onchange="seleccionarAsesor()"></select>
+                <div id="asesorSugerencias" style="position:absolute;background:white;border:1px solid #ddd;max-height:200px;overflow-y:auto;display:none;width:280px;z-index:1000"></div>
+            </div>
+
+            <div class="control-group">
+                <label>Origen:</label>
+                <select id="origenFilter" onchange="actualizarDatos()">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
             <div class="button-group">
-                <button onclick="exportarCSV()">Exportar CSV</button>
-                <button class="secondary" onclick="limpiarFiltros()">Limpiar Filtros</button>
+                <button onclick="limpiarFiltros()">Limpiar</button>
+                <button class="secondary" onclick="exportarCSV()">Exportar CSV</button>
             </div>
         </div>
 
-        <!-- Gráfico 1: Cotizaciones por Mes -->
         <div class="chart-container">
-            <h2>Cotizaciones por Mes</h2>
+            <h2>Total vs Cotizaciones Vendidas</h2>
             <div class="chart-wrapper">
-                <canvas id="chartCotizaciones"></canvas>
+                <canvas id="chartTotalVendidas"></canvas>
             </div>
         </div>
 
-        <!-- Gráfico 2: Tasa de Cierre -->
         <div class="chart-container">
-            <h2>Tasa de Cierre Porcentual por Mes</h2>
+            <h2>Cotizaciones por Origen</h2>
             <div class="chart-wrapper">
-                <canvas id="chartTasaCierre"></canvas>
+                <canvas id="chartOrigen"></canvas>
             </div>
         </div>
 
-        <!-- Gráfico 3: Top Asesores -->
-        <div class="chart-container">
-            <h2>Top 10 Asesores por Cotizaciones</h2>
+        <div class="chart-container" id="containerTopAsesores">
+            <h2>Top 10 Asesores</h2>
             <div class="chart-wrapper">
                 <canvas id="chartTopAsesores"></canvas>
             </div>
         </div>
 
-        <!-- Tabla de Datos Detallados -->
         <div class="table-container">
-            <h2>Datos Detallados por Asesor y Mes</h2>
+            <h2>Datos Detallados</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Asesor</th>
                         <th>Año</th>
                         <th>Mes</th>
-                        <th>Total Cotizaciones</th>
+                        <th>Origen</th>
+                        <th>Almacén</th>
+                        <th>Total</th>
                         <th>Vendidas</th>
-                        <th>Tasa Cierre %</th>
+                        <th>Tasa %</th>
                     </tr>
                 </thead>
-                <tbody id="dataTable">
-                    <!-- Se llena dinámicamente -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Tabla Resumen por Asesor -->
-        <div class="table-container">
-            <h2>Resumen Consolidado por Asesor</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Asesor</th>
-                        <th>Total Cotizaciones</th>
-                        <th>Vendidas</th>
-                        <th>Tasa Cierre %</th>
-                    </tr>
-                </thead>
-                <tbody id="resumenTable">
-                    <!-- Se llena dinámicamente -->
-                </tbody>
+                <tbody id="dataTable"></tbody>
             </table>
         </div>
     </div>
 
     <script>
-        let datosCompletos = {
-            resumen: {},
-            porAseseMes: [],
-            resumenAsesor: []
-        };
-
+        let datos = null;
         let graficos = {
-            cotizaciones: null,
-            tasaCierre: null,
+            totalVendidas: null,
+            origen: null,
             topAsesores: null
         };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarDatos();
-        });
-
         function cargarDatos() {
-            fetch('datos_dashboard/datos_completos.json')
-                .then(response => response.json())
-                .then(data => {
-                    datosCompletos.resumen = data.resumen_general;
-                    datosCompletos.porAseseMes = data.por_asesor_mes || [];
-                    datosCompletos.resumenAsesor = data.resumen_asesor || [];
-                    
-                    actualizarMetricas();
-                    llenarFiltros();
-                    actualizarDatos();
-                })
-                .catch(error => console.error('Error cargando datos:', error));
+            if (typeof DATOS_DASHBOARD === 'undefined') {
+                setTimeout(cargarDatos, 300);
+                return;
+            }
+
+            datos = DATOS_DASHBOARD;
+            console.log('Datos cargados exitosamente:', datos);
+            
+            actualizarMetricas();
+            llenarFiltros();
+            actualizarDatos();
         }
 
         function actualizarMetricas() {
             document.getElementById('metricTotalCot').textContent = 
-                datosCompletos.resumen.total_cotizaciones?.toLocaleString() || '-';
+                (datos.resumen_general.total_cotizaciones || 0).toLocaleString();
             document.getElementById('metricVendidas').textContent = 
-                datosCompletos.resumen.total_vendidas?.toLocaleString() || '-';
+                (datos.resumen_general.total_vendidas || 0).toLocaleString();
             document.getElementById('metricTasaCierre').textContent = 
-                datosCompletos.resumen.tasa_cierre?.toFixed(2) + '%' || '-';
+                (datos.resumen_general.tasa_cierre || 0).toFixed(2) + '%';
             document.getElementById('metricAsesores').textContent = 
-                datosCompletos.resumen.total_asesores || '-';
+                datos.resumen_general.total_asesores || 0;
         }
 
         function llenarFiltros() {
-            // Asesores únicos
-            const asesores = [...new Set(datosCompletos.resumenAsesor.map(a => a.nombre_vendedor))].sort();
-            const selectAsesor = document.getElementById('asesorFilter');
-            asesores.forEach(asesor => {
-                const option = document.createElement('option');
-                option.value = asesor;
-                option.textContent = asesor;
-                selectAsesor.appendChild(option);
-            });
-
-            // Años únicos
-            const anos = [...new Set(datosCompletos.porAseseMes.map(d => d.año))].sort();
+            // Años - ordenados
+            const anos = (datos.filtros.anos || [])
+                .filter(a => !isNaN(a) && a !== null && a !== undefined)
+                .map(a => parseInt(a))
+                .filter((v, i, a) => a.indexOf(v) === i)
+                .sort((a, b) => a - b);
+            
             const selectAno = document.getElementById('anoFilter');
             anos.forEach(ano => {
                 const option = document.createElement('option');
@@ -435,63 +431,65 @@
                 option.textContent = ano;
                 selectAno.appendChild(option);
             });
+
+            // Asesores - ordenados
+            const asesores = [...new Set(datos.filtros.asesores || [])].sort();
+            const selectAsesor = document.getElementById('asesorFilter');
+            asesores.forEach(asesor => {
+                const option = document.createElement('option');
+                option.value = asesor;
+                option.textContent = asesor;
+                selectAsesor.appendChild(option);
+            });
+            
+            // Llenar lista de asesores para autocomplete
+            window.asesoresLista = asesores;
+
+            // Orígenes - ordenados
+            const origenes = [...new Set(datos.filtros.origenes || [])].sort();
+            const selectOrigen = document.getElementById('origenFilter');
+            origenes.forEach(origen => {
+                const option = document.createElement('option');
+                option.value = origen;
+                option.textContent = origen;
+                selectOrigen.appendChild(option);
+            });
         }
 
         function actualizarDatos() {
-            const asesorSeleccionado = document.getElementById('asesorFilter').value;
-            const anoSeleccionado = document.getElementById('anoFilter').value;
-            const mesSeleccionado = document.getElementById('mesFilter').value;
+            const asesor = document.getElementById('asesorFilter').value;
+            const ano = document.getElementById('anoFilter').value;
+            const mes = document.getElementById('mesFilter').value;
+            const origen = document.getElementById('origenFilter').value;
 
-            // Filtrar datos por asesor y período
-            let datosFiltered = datosCompletos.porAseseMes;
-            
-            if (asesorSeleccionado) {
-                datosFiltered = datosFiltered.filter(d => d.nombre_vendedor === asesorSeleccionado);
-            }
-            
-            if (anoSeleccionado) {
-                datosFiltered = datosFiltered.filter(d => d.año === parseInt(anoSeleccionado));
-            }
-            
-            if (mesSeleccionado) {
-                datosFiltered = datosFiltered.filter(d => d.mes === parseInt(mesSeleccionado));
-            }
+            let datosFiltered = datos.por_asesor_mes_origen_almacen;
 
-            // Actualizar tabla
+            if (asesor) datosFiltered = datosFiltered.filter(d => d.nombre_vendedor === asesor);
+            if (ano) datosFiltered = datosFiltered.filter(d => Math.floor(d.año) === parseInt(ano));
+            if (mes) datosFiltered = datosFiltered.filter(d => Math.floor(d.mes) === parseInt(mes));
+            if (origen) datosFiltered = datosFiltered.filter(d => d.origen_negociacion === origen);
+
             actualizarTabla(datosFiltered);
-
-            // Actualizar gráficos
-            if (asesorSeleccionado) {
-                actualizarGraficosAsesor(datosFiltered);
-            } else {
-                actualizarGraficosGeneral();
-            }
-
-            // Actualizar tabla resumen
-            actualizarTablaResumen(datosCompletos.resumenAsesor);
+            actualizarGraficos(datosFiltered, asesor);
         }
 
-        function actualizarTabla(datos) {
+        function actualizarTabla(datosFiltered) {
             const tbody = document.getElementById('dataTable');
             tbody.innerHTML = '';
 
-            if (datos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No hay datos para los filtros seleccionados</td></tr>';
+            if (datosFiltered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">Sin datos</td></tr>';
                 return;
             }
 
-            datos.sort((a, b) => {
-                if (a.nombre_vendedor !== b.nombre_vendedor) {
-                    return a.nombre_vendedor.localeCompare(b.nombre_vendedor);
-                }
-                if (a.año !== b.año) return a.año - b.año;
-                return a.mes - b.mes;
-            }).forEach(row => {
+            datosFiltered.slice(0, 100).forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${row.nombre_vendedor}</td>
-                    <td>${row.año}</td>
-                    <td>${row.mes_nombre}</td>
+                    <td>${Math.floor(row.año)}</td>
+                    <td>${Math.floor(row.mes)}</td>
+                    <td>${row.origen_negociacion || '-'}</td>
+                    <td>${row.nombre_almacen || '-'}</td>
                     <td>${row.total_cotizaciones}</td>
                     <td>${row.cotizaciones_vendidas}</td>
                     <td class="percentage-cell">${row.tasa_cierre.toFixed(2)}%</td>
@@ -500,156 +498,155 @@
             });
         }
 
-        function actualizarTablaResumen(datos) {
-            const tbody = document.getElementById('resumenTable');
-            tbody.innerHTML = '';
+        function actualizarGraficos(datosFiltered, asesorSeleccionado) {
+            // Gráfico 1: Total vs Vendidas - adapta según si hay mes seleccionado
+            const mesSeleccionado = document.getElementById('mesFilter').value;
+            
+            let labels1, totales, vendidas;
 
-            datos.sort((a, b) => b.total_cotizaciones - a.total_cotizaciones).forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.nombre_vendedor}</td>
-                    <td>${row.total_cotizaciones}</td>
-                    <td>${row.cotizaciones_vendidas}</td>
-                    <td class="percentage-cell">${row.tasa_cierre.toFixed(2)}%</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+            if (mesSeleccionado) {
+                // Modo: Por año (cuando mes está seleccionado)
+                const porAno = {};
+                datosFiltered.forEach(d => {
+                    const ano = Math.floor(d.año);
+                    if (!porAno[ano]) porAno[ano] = { total: 0, vendidas: 0 };
+                    porAno[ano].total += d.total_cotizaciones;
+                    porAno[ano].vendidas += d.cotizaciones_vendidas;
+                });
 
-        function actualizarGraficosAsesor(datos) {
-            if (datos.length === 0) {
-                if (graficos.cotizaciones) graficos.cotizaciones.destroy();
-                if (graficos.tasaCierre) graficos.tasaCierre.destroy();
-                return;
+                labels1 = Object.keys(porAno).sort();
+                totales = labels1.map(ano => porAno[ano].total);
+                vendidas = labels1.map(ano => porAno[ano].vendidas);
+            } else {
+                // Modo: Total general (cuando NO hay mes seleccionado)
+                let totalCot = 0;
+                let totalVend = 0;
+                datosFiltered.forEach(d => {
+                    totalCot += d.total_cotizaciones;
+                    totalVend += d.cotizaciones_vendidas;
+                });
+
+                labels1 = ['Total Cotizaciones', 'Vendidas'];
+                totales = [totalCot, totalVend];
+                vendidas = [0, 0]; // No usar segunda serie en modo total
             }
 
-            // Ordenar datos por año y mes
-            datos.sort((a, b) => {
-                if (a.año !== b.año) return a.año - b.año;
-                return a.mes - b.mes;
-            });
-
-            const labels = datos.map(d => `${d.mes_nombre} ${d.año}`);
-            const cotTotal = datos.map(d => d.total_cotizaciones);
-            const cotVendidas = datos.map(d => d.cotizaciones_vendidas);
-            const tasaCierre = datos.map(d => d.tasa_cierre);
-
-            // Gráfico 1: Cotizaciones
-            if (graficos.cotizaciones) graficos.cotizaciones.destroy();
-            const ctx1 = document.getElementById('chartCotizaciones').getContext('2d');
-            graficos.cotizaciones = new Chart(ctx1, {
+            const ctx1 = document.getElementById('chartTotalVendidas').getContext('2d');
+            if (graficos.totalVendidas) graficos.totalVendidas.destroy();
+            
+            const config1 = {
                 type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: labels1,
+                    datasets: mesSeleccionado 
+                        ? [
+                            { label: 'Total Cotizaciones', data: totales, backgroundColor: '#1f497d' },
+                            { label: 'Vendidas', data: vendidas, backgroundColor: '#70ad47' }
+                        ]
+                        : [
+                            { label: 'Cantidad', data: totales, backgroundColor: ['#1f497d', '#70ad47'] }
+                        ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            };
+
+            graficos.totalVendidas = new Chart(ctx1, config1);
+
+            // Gráfico 2: Por Origen
+            const porOrigen = {};
+            datosFiltered.forEach(d => {
+                const o = d.origen_negociacion || 'Sin origen';
+                if (!porOrigen[o]) porOrigen[o] = { total: 0, vendidas: 0 };
+                porOrigen[o].total += d.total_cotizaciones;
+                porOrigen[o].vendidas += d.cotizaciones_vendidas;
+            });
+
+            const origenLabels = Object.keys(porOrigen).sort();
+            const origenTotales = origenLabels.map(o => porOrigen[o].total);
+            const origenVendidas = origenLabels.map(o => porOrigen[o].vendidas);
+
+            const ctx2 = document.getElementById('chartOrigen').getContext('2d');
+            if (graficos.origen) graficos.origen.destroy();
+            graficos.origen = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: origenLabels,
                     datasets: [
-                        {
-                            label: 'Total Cotizaciones',
-                            data: cotTotal,
-                            backgroundColor: '#1f497d'
-                        },
-                        {
-                            label: 'Vendidas',
-                            data: cotVendidas,
-                            backgroundColor: '#70ad47'
-                        }
+                        { label: 'Total', data: origenTotales, backgroundColor: '#1f497d' },
+                        { label: 'Vendidas', data: origenVendidas, backgroundColor: '#70ad47' }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
-            });
-
-            // Gráfico 2: Tasa de Cierre
-            if (graficos.tasaCierre) graficos.tasaCierre.destroy();
-            const ctx2 = document.getElementById('chartTasaCierre').getContext('2d');
-            graficos.tasaCierre = new Chart(ctx2, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Tasa de Cierre %',
-                        data: tasaCierre,
-                        borderColor: '#2d5aa8',
-                        backgroundColor: 'rgba(45, 90, 168, 0.05)',
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: '#2d5aa8',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { position: 'top' } },
-                    scales: {
-                        y: { 
-                            beginAtZero: true,
-                            max: 100
-                        }
-                    }
-                }
-            });
-        }
-
-        function actualizarGraficosGeneral() {
-            const top10 = datosCompletos.resumenAsesor.sort((a, b) => b.total_cotizaciones - a.total_cotizaciones).slice(0, 10);
-            const labels = top10.map(a => a.nombre_vendedor);
-            const datos_cot = top10.map(a => a.total_cotizaciones);
-
-            if (graficos.topAsesores) graficos.topAsesores.destroy();
-            const ctx = document.getElementById('chartTopAsesores').getContext('2d');
-            graficos.topAsesores = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total Cotizaciones',
-                        data: datos_cot,
-                        backgroundColor: '#1f497d'
-                    }]
-                },
-                options: {
                     indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
+                    plugins: { legend: { position: 'bottom' } }
                 }
             });
 
-            // Limpiar otros gráficos
-            if (graficos.cotizaciones) graficos.cotizaciones.destroy();
-            if (graficos.tasaCierre) graficos.tasaCierre.destroy();
+            // Gráfico 3: Top 10 Asesores - solo si NO hay asesor seleccionado
+            const containerTop = document.getElementById('containerTopAsesores');
+            if (asesorSeleccionado) {
+                containerTop.style.display = 'none';
+            } else {
+                containerTop.style.display = 'block';
+                
+                const topAsesores = {};
+                datosFiltered.forEach(d => {
+                    if (!topAsesores[d.nombre_vendedor]) topAsesores[d.nombre_vendedor] = 0;
+                    topAsesores[d.nombre_vendedor] += d.total_cotizaciones;
+                });
+
+                const top10 = Object.entries(topAsesores)
+                    .map(([nombre, total]) => ({ nombre, total }))
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 10);
+
+                const ctx3 = document.getElementById('chartTopAsesores').getContext('2d');
+                if (graficos.topAsesores) graficos.topAsesores.destroy();
+                graficos.topAsesores = new Chart(ctx3, {
+                    type: 'bar',
+                    data: {
+                        labels: top10.map(a => a.nombre),
+                        datasets: [{ label: 'Cotizaciones', data: top10.map(a => a.total), backgroundColor: '#2d5aa8' }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y',
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
         }
 
         function limpiarFiltros() {
-            document.getElementById('asesorFilter').value = '';
             document.getElementById('anoFilter').value = '';
             document.getElementById('mesFilter').value = '';
+            document.getElementById('asesorFilter').value = '';
+            document.getElementById('origenFilter').value = '';
             actualizarDatos();
         }
 
         function exportarCSV() {
-            const datos = datosCompletos.porAseseMes;
-            let csv = 'Asesor,Año,Mes,Total Cotizaciones,Vendidas,Tasa Cierre %\n';
-            
-            datos.forEach(row => {
-                csv += `"${row.nombre_vendedor}",${row.año},${row.mes},"${row.mes_nombre}",${row.total_cotizaciones},${row.cotizaciones_vendidas},${row.tasa_cierre.toFixed(2)}\n`;
+            let csv = 'Asesor,Año,Mes,Origen,Almacén,Total,Vendidas,Tasa %\n';
+            datos.por_asesor_mes_origen_almacen.forEach(d => {
+                csv += `"${d.nombre_vendedor}",${Math.floor(d.año)},${Math.floor(d.mes)},"${d.origen_negociacion || '-'}","${d.nombre_almacen || '-'}",${d.total_cotizaciones},${d.cotizaciones_vendidas},${d.tasa_cierre.toFixed(2)}\n`;
             });
-
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'cotizaciones_kpi.csv';
             link.click();
         }
+
+        cargarDatos();
     </script>
+    <script src="autocomplete-asesor.js"></script>
 </body>
 </html>
