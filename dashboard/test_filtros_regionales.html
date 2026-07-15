@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test - Filtros Regionales</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Test - Filtros Regionales y Almacén</h1>
+    
+    <div id="results"></div>
+
+    <script src="estructura_regiones.json"></script>
+    <script>
+        const resultados = [];
+
+        // Test 1: Cargar estructura de regiones
+        fetch('estructura_regiones.json')
+            .then(r => r.json())
+            .then(data => {
+                const result = {
+                    nombre: "Test 1: Cargar estructura_regiones.json",
+                    estado: data && Object.keys(data).length > 0 ? "PASS" : "FAIL",
+                    detalles: `Regiones cargadas: ${Object.keys(data).length}`
+                };
+                
+                // Test 2: Verificar 6 regiones
+                const regionesEsperadas = ["REGIÓN NORTE", "REGIÓN CENTRO", "REGIÓN SUR", "REGIÓN COSTA", "ADMINISTRACIÓN", "OTROS"];
+                const regionesCargadas = Object.keys(data);
+                const test2Pass = regionesEsperadas.every(r => regionesCargadas.includes(r));
+                resultados.push(result);
+                resultados.push({
+                    nombre: "Test 2: Verificar 6 regiones presentes",
+                    estado: test2Pass ? "PASS" : "FAIL",
+                    detalles: `Regiones: ${regionesCargadas.join(", ")}`
+                });
+
+                // Test 3: Verificar almacenes por región
+                const almacenesNorte = Object.keys(data["REGIÓN NORTE"]);
+                const test3Pass = almacenesNorte.length === 4;
+                resultados.push({
+                    nombre: "Test 3: REGIÓN NORTE tiene 4 almacenes",
+                    estado: test3Pass ? "PASS" : "FAIL",
+                    detalles: `Almacenes: ${almacenesNorte.join(", ")}`
+                });
+
+                // Test 4: Verificar asesores por almacén
+                const asesoresOrdonez = data["REGIÓN NORTE"]["ALM. ORDOÑEZ LASSO"];
+                const test4Pass = Array.isArray(asesoresOrdonez) && asesoresOrdonez.length > 0;
+                resultados.push({
+                    nombre: "Test 4: ALM. ORDOÑEZ LASSO tiene asesores",
+                    estado: test4Pass ? "PASS" : "FAIL",
+                    detalles: `Total asesores: ${asesoresOrdonez.length}`
+                });
+
+                // Test 5: Verificar cascada - Asesor en múltiples almacenes
+                const jazmina = Object.entries(data)
+                    .flatMap(([region, almacenes]) => 
+                        Object.entries(almacenes).map(([almacen, asesores]) => ({
+                            region, almacen, 
+                            tiene: asesores.includes("Jazmina Santamaría")
+                        }))
+                    )
+                    .filter(e => e.tiene);
+                
+                resultados.push({
+                    nombre: "Test 5: Jazmina Santamaría en múltiples almacenes",
+                    estado: jazmina.length > 1 ? "PASS" : "FAIL",
+                    detalles: `Aparece en ${jazmina.length} almacenes: ${jazmina.map(e => `${e.region}/${e.almacen}`).join(", ")}`
+                });
+
+                // Mostrar resultados
+                const html = resultados.map(r => 
+                    `<div class="test ${r.estado === 'PASS' ? 'pass' : 'fail'}">
+                        <strong>${r.nombre}</strong><br>
+                        Estado: ${r.estado}<br>
+                        ${r.detalles}
+                    </div>`
+                ).join('');
+                
+                document.getElementById('results').innerHTML = html;
+            })
+            .catch(e => {
+                document.getElementById('results').innerHTML = 
+                    `<div class="test fail"><strong>ERROR:</strong> ${e.message}</div>`;
+            });
+    </script>
+</body>
+</html>
