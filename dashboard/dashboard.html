@@ -365,6 +365,20 @@
 
         <div class="controls">
             <div class="control-group">
+                <label>Regional:</label>
+                <select id="regionalFilter" onchange="actualizarAlmacenes(); actualizarDatos()">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Almacén:</label>
+                <select id="almacenFilter" onchange="actualizarAsesores(); actualizarDatos()">
+                    <option value="">Todos</option>
+                </select>
+            </div>
+
+            <div class="control-group">
                 <label>Año:</label>
                 <select id="anoFilter" onchange="actualizarDatos()">
                     <option value="">Todos</option>
@@ -455,11 +469,24 @@
 
     <script>
         let datos = null;
+        let estructuraRegiones = null;
         let graficos = {
             totalVendidas: null,
             origen: null,
             topAsesores: null
         };
+
+        // Cargar estructura de regiones desde JSON
+        async function cargarEstructuraRegiones() {
+            try {
+                const response = await fetch('estructura_regiones.json');
+                estructuraRegiones = await response.json();
+                console.log('✓ Estructura de regiones cargada');
+            } catch (e) {
+                console.error('Error cargando estructura de regiones:', e);
+                estructuraRegiones = {};
+            }
+        }
 
         function cargarDatos() {
             // Esperar a que DATOS_DASHBOARD esté disponible (se carga desde datos.js)
@@ -483,6 +510,16 @@
         }
 
         function llenarFiltros() {
+            // Regiones - ordenadas
+            const regiones = Object.keys(estructuraRegiones || {}).sort();
+            const selectRegional = document.getElementById('regionalFilter');
+            regiones.forEach(region => {
+                const option = document.createElement('option');
+                option.value = region;
+                option.textContent = region;
+                selectRegional.appendChild(option);
+            });
+
             // Años - ordenados
             const anos = (datos.filtros.anos || [])
                 .filter(a => !isNaN(a) && a !== null && a !== undefined)
@@ -522,7 +559,77 @@
             });
         }
 
+        function actualizarAlmacenes() {
+            const regional = document.getElementById('regionalFilter').value;
+            const selectAlmacen = document.getElementById('almacenFilter');
+            
+            // Limpiar almacenes actuales
+            selectAlmacen.innerHTML = '<option value="">Todos</option>';
+            
+            // Si no hay región seleccionada, mostrar todos los almacenes
+            if (!regional) {
+                const almacenes = Object.keys(datos.filtros.almacenes || {}).sort();
+                almacenes.forEach(almacen => {
+                    const option = document.createElement('option');
+                    option.value = almacen;
+                    option.textContent = almacen;
+                    selectAlmacen.appendChild(option);
+                });
+            } else {
+                // Mostrar solo almacenes de la región seleccionada
+                const almacenesRegion = Object.keys(estructuraRegiones[regional] || {}).sort();
+                almacenesRegion.forEach(almacen => {
+                    const option = document.createElement('option');
+                    option.value = almacen;
+                    option.textContent = almacen;
+                    selectAlmacen.appendChild(option);
+                });
+            }
+            
+            // Limpiar almacén seleccionado
+            selectAlmacen.value = '';
+            // Actualizar asesores cuando cambia región
+            actualizarAsesores();
+        }
+
+        function actualizarAsesores() {
+            const regional = document.getElementById('regionalFilter').value;
+            const almacen = document.getElementById('almacenFilter').value;
+            
+            // Obtener asesores disponibles según los filtros
+            let asesoresDisponibles = new Set();
+            
+            if (!regional && !almacen) {
+                // Si no hay filtros de región/almacén, mostrar todos
+                asesoresDisponibles = new Set(datos.filtros.asesores || []);
+            } else if (regional && !almacen) {
+                // Si hay región pero sin almacén, mostrar asesores de esa región
+                const almacenesRegion = Object.keys(estructuraRegiones[regional] || {});
+                almacenesRegion.forEach(alm => {
+                    (estructuraRegiones[regional][alm] || []).forEach(asesor => {
+                        asesoresDisponibles.add(asesor);
+                    });
+                });
+            } else if (regional && almacen) {
+                // Si hay región Y almacén, mostrar asesores de ese almacén
+                (estructuraRegiones[regional][almacen] || []).forEach(asesor => {
+                    asesoresDisponibles.add(asesor);
+                });
+            }
+            
+            // Actualizar la lista de asesores para autocomplete
+            window.asesoresLista = Array.from(asesoresDisponibles).sort();
+            
+            // Limpiar el campo de asesor si es necesario
+            const asesorInput = document.getElementById('asesorFilter');
+            if (asesorInput.value && !window.asesoresLista.includes(asesorInput.value)) {
+                asesorInput.value = '';
+            }
+        }
+
         function actualizarDatos() {
+            const regional = document.getElementById('regionalFilter').value;
+            const almacen = document.getElementById('almacenFilter').value;
             const asesor = document.getElementById('asesorFilter').value;
             const ano = document.getElementById('anoFilter').value;
             const mes = document.getElementById('mesFilter').value;
@@ -530,6 +637,16 @@
 
             let datosFiltered = datos.por_asesor_mes_origen_almacen;
 
+            // Aplicar filtros en orden
+            if (regional) {
+                const almacenesRegion = Object.keys(estructuraRegiones[regional] || {});
+                datosFiltered = datosFiltered.filter(d => almacenesRegion.includes(d.nombre_almacen));
+            }
+            
+            if (almacen) {
+                datosFiltered = datosFiltered.filter(d => d.nombre_almacen === almacen);
+            }
+            
             if (asesor) datosFiltered = datosFiltered.filter(d => d.nombre_vendedor === asesor);
             if (ano) datosFiltered = datosFiltered.filter(d => Math.floor(d.año) === parseInt(ano));
             if (mes) datosFiltered = datosFiltered.filter(d => Math.floor(d.mes) === parseInt(mes));
@@ -717,10 +834,14 @@
         }
 
         function limpiarFiltros() {
+            document.getElementById('regionalFilter').value = '';
+            document.getElementById('almacenFilter').value = '';
             document.getElementById('anoFilter').value = '';
             document.getElementById('mesFilter').value = '';
             document.getElementById('asesorFilter').value = '';
             document.getElementById('origenFilter').value = '';
+            actualizarAlmacenes();
+            actualizarAsesores();
             actualizarDatos();
         }
 
@@ -736,7 +857,7 @@
             link.click();
         }
 
-        cargarDatos();
+        cargarEstructuraRegiones().then(() => cargarDatos());
     </script>
     <script src="autocomplete-asesor.js"></script>
 </body>
