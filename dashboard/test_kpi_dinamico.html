@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Test KPI Dinámico</title>
+    <script src="datos.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: #f3f5f7;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        h2 { color: #0078d4; }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            background: #f3f5f7;
+            border-left: 4px solid #0078d4;
+        }
+        .pass { border-left-color: #107c10; background: #f0f8f5; }
+        .fail { border-left-color: #e81123; background: #fef3f2; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #0078d4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover { background: #106ebe; }
+    </style>
+</head>
+<body>
+    <h1>Test KPI Dinámico</h1>
+    
+    <div class="test-section">
+        <h2>1. Verificar carga de datos</h2>
+        <button onclick="testCargarDatos()">Test Datos</button>
+        <div id="test1"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Calcular KPIs sin filtros</h2>
+        <button onclick="testKpiTotal()">Test KPI Total</button>
+        <div id="test2"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Calcular KPIs con filtro de asesor</h2>
+        <button onclick="testKpiAsesor()">Test KPI Asesor</button>
+        <div id="test3"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Calcular KPIs con filtro de año</h2>
+        <button onclick="testKpiAno()">Test KPI Año</button>
+        <div id="test4"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. Calcular KPIs con múltiples filtros</h2>
+        <button onclick="testKpiMultiple()">Test KPI Múltiple</button>
+        <div id="test5"></div>
+    </div>
+
+    <script>
+        function addResult(testNum, title, pass, detail) {
+            const elem = document.getElementById('test' + testNum);
+            const className = pass ? 'pass' : 'fail';
+            const status = pass ? '✓ PASS' : '✗ FAIL';
+            elem.innerHTML += `<div class="result ${className}"><strong>${status}:</strong> ${title}<br>${detail}</div>`;
+        }
+
+        function testCargarDatos() {
+            document.getElementById('test1').innerHTML = '';
+            if (typeof DATOS_DASHBOARD !== 'undefined') {
+                const total = DATOS_DASHBOARD.por_asesor_mes_origen_almacen.length;
+                addResult(1, 'Datos cargados correctamente', true, 
+                    `Registros totales: ${total.toLocaleString()}`);
+                addResult(1, 'Resumen general', true,
+                    `Total cotizaciones: ${DATOS_DASHBOARD.resumen_general.total_cotizaciones.toLocaleString()}<br>` +
+                    `Vendidas: ${DATOS_DASHBOARD.resumen_general.total_vendidas.toLocaleString()}<br>` +
+                    `Tasa: ${DATOS_DASHBOARD.resumen_general.tasa_cierre.toFixed(2)}%`);
+            } else {
+                addResult(1, 'Datos NO cargados', false, 'DATOS_DASHBOARD no está definido');
+            }
+        }
+
+        function calcularKPI(datosFiltered) {
+            let totalCot = 0, totalVend = 0;
+            datosFiltered.forEach(d => {
+                totalCot += d.total_cotizaciones;
+                totalVend += d.cotizaciones_vendidas;
+            });
+            const tasa = totalCot > 0 ? ((totalVend / totalCot) * 100).toFixed(2) : 0;
+            return { totalCot, totalVend, tasa, registros: datosFiltered.length };
+        }
+
+        function testKpiTotal() {
+            document.getElementById('test2').innerHTML = '';
+            const kpi = calcularKPI(DATOS_DASHBOARD.por_asesor_mes_origen_almacen);
+            addResult(2, 'KPI Sin Filtros', true,
+                `Total: ${kpi.totalCot.toLocaleString()} | ` +
+                `Vendidas: ${kpi.totalVend.toLocaleString()} | ` +
+                `Tasa: ${kpi.tasa}% | ` +
+                `Registros: ${kpi.registros.toLocaleString()}`);
+        }
+
+        function testKpiAsesor() {
+            document.getElementById('test3').innerHTML = '';
+            const asesor = 'Jazmina Santamaría';
+            let filtered = DATOS_DASHBOARD.por_asesor_mes_origen_almacen
+                .filter(d => d.nombre_vendedor === asesor);
+            const kpi = calcularKPI(filtered);
+            addResult(3, `KPI Asesor: ${asesor}`, kpi.totalCot > 0, 
+                `Total: ${kpi.totalCot.toLocaleString()} | ` +
+                `Vendidas: ${kpi.totalVend.toLocaleString()} | ` +
+                `Tasa: ${kpi.tasa}% | ` +
+                `Registros: ${kpi.registros.toLocaleString()}`);
+        }
+
+        function testKpiAno() {
+            document.getElementById('test4').innerHTML = '';
+            const ano = 2023;
+            let filtered = DATOS_DASHBOARD.por_asesor_mes_origen_almacen
+                .filter(d => Math.floor(d.año) === ano);
+            const kpi = calcularKPI(filtered);
+            addResult(4, `KPI Año: ${ano}`, kpi.totalCot > 0,
+                `Total: ${kpi.totalCot.toLocaleString()} | ` +
+                `Vendidas: ${kpi.totalVend.toLocaleString()} | ` +
+                `Tasa: ${kpi.tasa}% | ` +
+                `Registros: ${kpi.registros.toLocaleString()}`);
+        }
+
+        function testKpiMultiple() {
+            document.getElementById('test5').innerHTML = '';
+            const asesor = 'Jazmina Santamaría';
+            const ano = 2023;
+            const mes = 6;
+            let filtered = DATOS_DASHBOARD.por_asesor_mes_origen_almacen
+                .filter(d => d.nombre_vendedor === asesor && Math.floor(d.año) === ano && Math.floor(d.mes) === mes);
+            const kpi = calcularKPI(filtered);
+            addResult(5, `KPI: ${asesor} | ${ano}-${mes}`, kpi.totalCot > 0,
+                `Total: ${kpi.totalCot.toLocaleString()} | ` +
+                `Vendidas: ${kpi.totalVend.toLocaleString()} | ` +
+                `Tasa: ${kpi.tasa}% | ` +
+                `Registros: ${kpi.registros.toLocaleString()}`);
+        }
+
+        // Test automático al cargar
+        setTimeout(() => {
+            testCargarDatos();
+            testKpiTotal();
+            testKpiAsesor();
+            testKpiAno();
+            testKpiMultiple();
+        }, 500);
+    </script>
+</body>
+</html>

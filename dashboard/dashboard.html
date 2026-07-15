@@ -472,24 +472,14 @@
                 console.log('  Total cotizaciones:', datos.resumen_general.total_cotizaciones);
                 console.log('  Registros en array:', datos.por_asesor_mes_origen_almacen.length);
                 
-                actualizarMetricas();
                 llenarFiltros();
+                // Actualizar métricas iniciales con todos los datos
+                actualizarMetricasFiltradas(datos.por_asesor_mes_origen_almacen);
                 actualizarDatos();
             } else {
                 // Si no está disponible aún, esperar y reintentar
                 setTimeout(cargarDatos, 100);
             }
-        }
-
-        function actualizarMetricas() {
-            document.getElementById('metricTotalCot').textContent = 
-                (datos.resumen_general.total_cotizaciones || 0).toLocaleString();
-            document.getElementById('metricVendidas').textContent = 
-                (datos.resumen_general.total_vendidas || 0).toLocaleString();
-            document.getElementById('metricTasaCierre').textContent = 
-                (datos.resumen_general.tasa_cierre || 0).toFixed(2) + '%';
-            document.getElementById('metricAsesores').textContent = 
-                datos.resumen_general.total_asesores || 0;
         }
 
         function llenarFiltros() {
@@ -545,8 +535,33 @@
             if (mes) datosFiltered = datosFiltered.filter(d => Math.floor(d.mes) === parseInt(mes));
             if (origen) datosFiltered = datosFiltered.filter(d => d.origen_negociacion === origen);
 
+            actualizarMetricasFiltradas(datosFiltered);
             actualizarTabla(datosFiltered);
             actualizarGraficos(datosFiltered, asesor);
+        }
+
+        function actualizarMetricasFiltradas(datosFiltered) {
+            // Calcular métricas basadas en los datos filtrados
+            let totalCotizaciones = 0;
+            let totalVendidas = 0;
+
+            datosFiltered.forEach(d => {
+                totalCotizaciones += d.total_cotizaciones;
+                totalVendidas += d.cotizaciones_vendidas;
+            });
+
+            const tasaCierre = totalCotizaciones > 0 
+                ? ((totalVendidas / totalCotizaciones) * 100).toFixed(2)
+                : 0;
+
+            // Actualizar valores en las tarjetas
+            document.getElementById('metricTotalCot').textContent = totalCotizaciones.toLocaleString();
+            document.getElementById('metricVendidas').textContent = totalVendidas.toLocaleString();
+            document.getElementById('metricTasaCierre').textContent = parseFloat(tasaCierre).toFixed(2) + '%';
+            
+            // El total de asesores se mantiene igual (68) o puede cambiar según filtros
+            const asesoresUnicos = [...new Set(datosFiltered.map(d => d.nombre_vendedor))].length;
+            document.getElementById('metricAsesores').textContent = asesoresUnicos;
         }
 
         function actualizarTabla(datosFiltered) {
