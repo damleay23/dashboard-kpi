@@ -1,0 +1,229 @@
+================================================================================
+FLUJO DE DATOS - DASHBOARD KPI v2.9
+================================================================================
+
+ENTRADA: CSV historia_proforma_reporte.csv (436,889 registros)
+  └─ 28 columnas
+  └─ Período: 2002-2026
+  └─ Columnas CLAVE utilizadas: 6 campos principales
+
+
+                    ┌────────────────────────────────────┐
+                    │ CSV ORIGINAL: 436,889 registros    │
+                    └────────────┬───────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ PASO 1: DEDUPLICACIÓN              │
+                    │ • Ordena por fecha                 │
+                    │ • Elimina duplicados por           │
+                    │   cotizacion ID                    │
+                    │ • Keep: ÚLTIMO registro            │
+                    │ Resultado: 64,447 únicos           │
+                    └────────────┬───────────────────────┘
+                                 │
+        ┌─────────────────────────┼─────────────────────────┐
+        │                         │                         │
+        ▼                         ▼                         ▼
+   nombre_vendedor        nombre_almacen           origen_negociacion
+   (Col 6)                (Col 3)                  (Col 12)
+   "JANNETH LUNA"         "ALM. JUAN TANCA"        "Llamada", "Neo", etc.
+   
+        │                         │                         │
+        └─────────────────────────┼─────────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ PASO 2: NORMALIZACIÓN              │
+                    │ • "Neo" → "Digitales"             │
+                    │ • "Interno" → "Visita Almacen"    │
+                    │ • "Externo" → "Visita Obra"       │
+                    │ • Detecta "Ferias" (FEV*)         │
+                    └────────────┬───────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ PASO 3: EXTRAE FECHAS              │
+                    │ fecha_creacion_cliente (Col 8)     │
+                    │ → Extrae AÑO (2002-2026)           │
+                    │ → Extrae MES (1-12)                │
+                    │ → Filtra: Solo 2020+              │
+                    └────────────┬───────────────────────┘
+                                 │
+        ┌─────────────────────────┼─────────────────────────┐
+        │                         │                         │
+        ▼                         ▼                         ▼
+    numero_factura          ultimo_registro         cotizacion ID
+    (Col 25)                 (Col 22)                (Col 4)
+    "001-001-123..." o NULL  1.0 o 0.0             "19-6988", "FEV11383"
+    
+        │                         │                         │
+        └─────────────────────────┼─────────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ PASO 4: VALIDA VENTAS REALES       │
+                    │ SI:                                │
+                    │   numero_factura ≠ NULL AND        │
+                    │   ultimo_registro = 1.0            │
+                    │ ENTONCES: es_vendida = 1           │
+                    │ SINO: es_vendida = 0               │
+                    │ Resultado: 10,648 ventas           │
+                    │ (23,639 con numero_factura)        │
+                    │ (87,745 sin numero = FALSOS)       │
+                    └────────────┬───────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ PASO 5: AGRUPACIÓN Y CÁLCULOS      │
+                    │                                    │
+                    │ Agrupa por:                        │
+                    │ (nombre_vendedor +                 │
+                    │  año +                             │
+                    │  mes +                             │
+                    │  origen_negociacion +              │
+                    │  nombre_almacen)                   │
+                    │                                    │
+                    │ Calcula por grupo:                 │
+                    │ • total_cotizaciones = COUNT()     │
+                    │ • cotizaciones_vendidas = SUM()    │
+                    │ • tasa_cierre = vendidas/total*100 │
+                    │                                    │
+                    │ Resultado: 13,199 grupos           │
+                    └────────────┬───────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ GENERA: datos.js                   │
+                    │ {                                  │
+                    │   resumen_general: {...},          │
+                    │   filtros: {...},                  │
+                    │   por_asesor_mes_origen_almacen: []│
+                    │ }                                  │
+                    └────────────┬───────────────────────┘
+                                 │
+                    ┌────────────▼───────────────────────┐
+                    │ SALIDA: index.html                 │
+                    │ • Carga datos.js                   │
+                    │ • Aplica filtros                   │
+                    │ • Renderiza:                       │
+                    │   - Métricas KPI                   │
+                    │   - Matriz de canales              │
+                    │   - 2 gráficos de barras           │
+                    └────────────────────────────────────┘
+
+================================================================================
+DETALLE: ESTRUCTURA DE UN REGISTRO EN datos.js
+================================================================================
+
+{
+  "nombre_vendedor": "JANNETH LUNA",        ← Nombre del asesor (Col 6 CSV)
+  "año": 2026.0,                            ← Año extraído de fecha (Col 8)
+  "mes": 1.0,                               ← Mes extraído de fecha (Col 8)
+  "origen_negociacion": "Visita Almacen",   ← Canal normalizado (Col 12)
+  "nombre_almacen": "ALM. ORDOÑEZ LASSO",   ← Nombre almacén (Col 3)
+  "total_cotizaciones": 45,                 ← COUNT registros en el grupo
+  "cotizaciones_vendidas": 8,               ← COUNT donde numero_factura ≠ NULL
+  "tasa_cierre": 17.78,                     ← (8/45)*100
+  "mes_nombre": "Enero"                     ← Traducción: 1="Enero"
+}
+
+================================================================================
+CAMPOS QUE NO SE USAN (PERO EXISTEN EN CSV)
+================================================================================
+
+⚠️ CRÍTICOS - Debería considerarse usarlos:
+
+1. id_almacen (Col 2)
+   • ID numérico: 19, 42, 8, 74, 80, 82, etc.
+   • USO ACTUAL: NO
+   • PROBLEMA: Si hay variantes de nombre, no se diferencia bien
+   • SOLUCIÓN: Agregar a datos.js
+
+2. id_asesor (Col 5)
+   • ID numérico del vendedor
+   • USO ACTUAL: NO (se usa nombre)
+   • PROBLEMA: Nombres pueden repetirse o variar
+   • SOLUCIÓN: Usar id_asesor como clave única
+
+❌ NO CRÍTICOS - Datos descartados:
+
+   • id (Col 1): ID único del registro (no necesario después de dedup)
+   • ced_cliente (Col 7): Cédula del cliente
+   • cotizacion_relacionada (Col 10): Cotización relacionada
+   • motivo_relacion (Col 11): Motivo de relación
+   • cliente_compartido (Col 13): Si cliente es compartido
+   • estado_cliente (Col 14): Estado del cliente
+   • visita_almacen (Col 15): Indicador de visita
+   • motivo_cliente (Col 16): Motivo del cliente
+   • fecha_seguimiento (Col 17): Fecha de seguimiento
+   • valor_factura (Col 18): Valor de factura
+   • cotizacion_recorrido (Col 19): Cotización recorrido
+   • observacion (Col 20): Observaciones
+   • nombre_cliente (Col 21): Nombre del cliente
+   • temperatura (Col 23): Temperatura (Tibio, Caliente, etc.)
+   • id_cliente_proforma (Col 24): ID del cliente en Proforma
+   • nombre_factura (Col 26): Nombre de la factura
+   • idCotizacion (Col 27): Otro ID de cotización
+   • donde_conocio (Col 28): Dónde conoció al cliente
+
+================================================================================
+ESTADÍSTICAS DE PROCESAMIENTO
+================================================================================
+
+ENTRADA:
+  • Registros originales: 436,889
+  • Período: 2002-2026 (25 años)
+
+DEDUPLICACIÓN:
+  • Cotizaciones únicas: 64,447
+  • Registros duplicados: 372,442 (85.2%)
+  • Razón: Múltiples seguimientos por cotización
+
+NORMALIZACIÓN:
+  • Canales después: Digitales, Llamada, Visita Almacen, Visita Obra, Ferias
+  • Antes: Neo, Interno, Externo, Llamada, Visita Almacen
+
+VALIDACIÓN DE VENTAS:
+  • Con numero_factura: 23,639 (5.41%)
+  • Sin numero_factura: 413,250 (94.59%)
+  • Ventas reales (con número + último): 10,648 (2.43% del total)
+
+AGRUPACIÓN FINAL:
+  • Registros generados: 13,199
+  • Asesor únicos: 84
+  • Almacenes únicos: 12-15 (varía por filtro)
+  • Años presentes: 25 (2002-2026)
+  • Meses: 12
+
+DATOS 2026 ESPECÍFICAMENTE:
+  • Registros: 5,207
+  • Meses con datos: 7 (Enero-Julio)
+  • Vendidas: 417
+  • Tasa: 8.01%
+
+================================================================================
+FILTROS DISPONIBLES EN DASHBOARD
+================================================================================
+
+Los datos se pueden filtrar por:
+
+1. REGIÓN (estructura_regionales_nuevos.json)
+   → Filtra automáticamente almacenes de esa región
+
+2. ALMACÉN ESPECÍFICO
+   → Muestra solo datos de ese almacén
+
+3. ASESOR
+   → Filtra por nombre del vendedor
+
+4. AÑO
+   → Solo 2020+ mostrado en selector (pero todos cargados)
+
+5. MES
+   → Enero a Diciembre (1-12)
+
+6. ORIGEN/CANAL
+   → Digitales, Llamada, Visita Almacen, Visita Obra, Ferias y Eventos
+
+Cuando aplicas filtros, se recalculan:
+  • Métricas KPI (Total, Vendidas, Tasa)
+  • Matriz de canales por almacén
+  • Gráfico de vendidas por origen
+  • Gráfico de top 10 asesores
+
+================================================================================
