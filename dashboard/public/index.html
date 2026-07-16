@@ -772,6 +772,7 @@
             };
             
             const canales = ['Visita Almacen', 'Digitales', 'Llamada', 'Visita Obra', 'Ferias y Eventos'];
+            const tipos = ['Ingresos/Cotizaciones', 'Vendidas', 'Tasa Cierre (%)'];
             
             mesesUnicos.forEach(mes => {
                 const mesNombre = nombre_meses[mes] || `Mes ${mes}`;
@@ -797,23 +798,23 @@
                 table.style.width = '100%';
                 table.style.borderCollapse = 'collapse';
                 
-                // Header
+                // Header - Ahora los tipos van en las columnas
                 const thead = document.createElement('thead');
                 const headerRow = document.createElement('tr');
                 headerRow.style.background = '#f3f5f7';
                 headerRow.style.borderBottom = '1px solid #e1e1e1';
                 
-                const thTipo = document.createElement('th');
-                thTipo.textContent = 'Tipo';
-                thTipo.style.padding = '12px';
-                thTipo.style.textAlign = 'left';
-                thTipo.style.fontWeight = '600';
-                thTipo.style.fontSize = '12px';
-                headerRow.appendChild(thTipo);
+                const thCanal = document.createElement('th');
+                thCanal.textContent = 'Canal';
+                thCanal.style.padding = '12px';
+                thCanal.style.textAlign = 'left';
+                thCanal.style.fontWeight = '600';
+                thCanal.style.fontSize = '12px';
+                headerRow.appendChild(thCanal);
                 
-                canales.forEach(canal => {
+                tipos.forEach(tipo => {
                     const th = document.createElement('th');
-                    th.textContent = canal;
+                    th.textContent = tipo;
                     th.style.padding = '12px';
                     th.style.textAlign = 'center';
                     th.style.fontWeight = '600';
@@ -833,40 +834,44 @@
                 thead.appendChild(headerRow);
                 table.appendChild(thead);
                 
-                // Body
+                // Body - Filas por canal
                 const tbody = document.createElement('tbody');
                 
-                filasDelMes.forEach(fila => {
+                canales.forEach(canal => {
                     const row = document.createElement('tr');
                     row.style.borderBottom = '1px solid #f3f5f7';
                     
-                    const tdTipo = document.createElement('td');
-                    tdTipo.textContent = fila.tipo;
-                    tdTipo.style.padding = '12px';
-                    tdTipo.style.fontSize = '13px';
-                    tdTipo.style.fontWeight = '600';
-                    tdTipo.style.color = fila.tipo === 'Tasa Cierre (%)' ? '#0078d4' : '#1a1a1a';
-                    row.appendChild(tdTipo);
+                    const tdCanal = document.createElement('td');
+                    tdCanal.textContent = canal;
+                    tdCanal.style.padding = '12px';
+                    tdCanal.style.fontSize = '13px';
+                    tdCanal.style.fontWeight = '600';
+                    tdCanal.style.color = '#1a1a1a';
+                    row.appendChild(tdCanal);
                     
-                    let totalFila = 0;
+                    let totalCanal = 0;
                     
-                    canales.forEach(canal => {
+                    tipos.forEach(tipo => {
                         const td = document.createElement('td');
-                        const valor = fila[canal] || 0;
-                        td.textContent = valor;
-                        td.style.padding = '12px';
-                        td.style.textAlign = 'center';
-                        td.style.fontSize = '13px';
                         
-                        // Colorear según tipo
-                        if (fila.tipo === 'Tasa Cierre (%)') {
+                        // Buscar el valor en las filas
+                        const filaDelTipo = filasDelMes.find(f => f.tipo === tipo);
+                        const valor = filaDelTipo ? (filaDelTipo[canal] || 0) : 0;
+                        
+                        if (tipo === 'Tasa Cierre (%)') {
                             td.textContent = valor.toFixed(2) + '%';
                             td.style.color = valor >= 50 ? '#107C10' : valor >= 25 ? '#FFB900' : '#E81123';
                             td.style.fontWeight = '600';
+                        } else {
+                            td.textContent = valor;
                         }
                         
-                        totalFila += valor;
+                        td.style.padding = '12px';
+                        td.style.textAlign = 'center';
+                        td.style.fontSize = '13px';
                         row.appendChild(td);
+                        
+                        totalCanal += valor;
                     });
                     
                     const tdTotal = document.createElement('td');
@@ -875,14 +880,8 @@
                     tdTotal.style.fontSize = '13px';
                     tdTotal.style.fontWeight = '700';
                     tdTotal.style.background = '#f0f6ff';
-                    
-                    if (fila.tipo === 'Tasa Cierre (%)') {
-                        tdTotal.textContent = fila.TOTAL.toFixed(2) + '%';
-                        tdTotal.style.color = '#0078d4';
-                    } else {
-                        tdTotal.textContent = fila.TOTAL;
-                        tdTotal.style.color = '#0078d4';
-                    }
+                    tdTotal.textContent = totalCanal;
+                    tdTotal.style.color = '#0078d4';
                     
                     row.appendChild(tdTotal);
                     tbody.appendChild(row);
