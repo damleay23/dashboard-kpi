@@ -749,6 +749,7 @@
 
         function actualizarTabla(datosFiltered) {
             // Pasar datos filtrados a la matriz
+            console.log('👉 actualizarTabla llamado con', datosFiltered.length, 'registros');
             generarMatrizCanales(datosFiltered);
         }
 
@@ -758,11 +759,26 @@
             
             // Si no se pasan datos, usar datos filtrados del DOM
             if (!datosFiltered || datosFiltered.length === 0) {
+                console.log('⚠️ datosFiltered vacío, leyendo filtros del DOM');
                 const asesorSeleccionado = document.getElementById('asesorFilter').value;
                 const anoSeleccionado = document.getElementById('anoFilter').value;
                 const mesSeleccionado = document.getElementById('mesFilter').value;
+                const regionalSeleccionado = document.getElementById('regionalFilter').value;
+                const almacenSeleccionado = document.getElementById('almacenFilter').value;
+                const origenSeleccionado = document.getElementById('origenFilter').value;
                 
                 let datos_temp = datos.por_asesor_mes_origen_almacen;
+                
+                console.log('Filtros:', {asesor: asesorSeleccionado, año: anoSeleccionado, mes: mesSeleccionado, región: regionalSeleccionado, almacén: almacenSeleccionado, origen: origenSeleccionado});
+                
+                if (regionalSeleccionado) {
+                    const almacenesRegion = Object.keys(estructuraRegiones[regionalSeleccionado] || {});
+                    datos_temp = datos_temp.filter(d => almacenesRegion.includes(d.nombre_almacen));
+                }
+                
+                if (almacenSeleccionado) {
+                    datos_temp = datos_temp.filter(d => d.nombre_almacen === almacenSeleccionado);
+                }
                 
                 if (asesorSeleccionado) {
                     datos_temp = datos_temp.filter(d => d.nombre_vendedor === asesorSeleccionado);
@@ -773,8 +789,12 @@
                 if (mesSeleccionado) {
                     datos_temp = datos_temp.filter(d => Math.floor(d.mes) === parseInt(mesSeleccionado));
                 }
+                if (origenSeleccionado) {
+                    datos_temp = datos_temp.filter(d => d.origen_negociacion === origenSeleccionado);
+                }
                 
                 datosFiltered = datos_temp;
+                console.log('Datos después de filtrar:', datosFiltered.length);
             }
             
             if (datosFiltered.length === 0) {
@@ -790,10 +810,17 @@
             // Obtener meses únicos del filtro
             const mesesUnicos = [...new Set(datosFiltered.map(r => Math.floor(r.mes)))].sort((a, b) => a - b);
             
-            // Obtener todos los almacenes y canales únicos
+            // Obtener TODOS los canales que existen en los datos filtrados
+            const canalesUnicos = [...new Set(datosFiltered.map(d => d.origen_negociacion))];
+            
+            // Obtener todos los almacenes DESGLOSADOS por cada asesor si está filtrado
             const almacenesUnicos = [...new Set(datosFiltered
                 .filter(d => d.origen_negociacion === 'Visita Almacen')
                 .map(d => d.nombre_almacen))].sort();
+            
+            console.log('Canales únicos:', canalesUnicos);
+            console.log('Almacenes únicos:', almacenesUnicos);
+            console.log('Meses únicos:', mesesUnicos);
             
             mesesUnicos.forEach(mes => {
                 const mesNombre = nombre_meses[mes] || `Mes ${mes}`;
@@ -816,17 +843,27 @@
                 titulo.style.color = '#1a1a1a';
                 mesDiv.appendChild(titulo);
                 
-                // Estructurar datos para la matriz
+                // Estructurar datos para la matriz - SOLO incluir canales que existen
                 const matrizMes = {};
                 
-                // Inicializar estructura
-                almacenesUnicos.forEach(alm => {
+                // Inicializar estructura SOLO para almacenes que existen en este mes
+                const almacenesDelMes = [...new Set(datosDelMes
+                    .filter(d => d.origen_negociacion === 'Visita Almacen')
+                    .map(d => d.nombre_almacen))].sort();
+                
+                almacenesDelMes.forEach(alm => {
                     matrizMes[`ALM: ${alm}`] = { 'Ingresos': 0, 'Vendidas': 0 };
                 });
-                matrizMes['Digitales'] = { 'Ingresos': 0, 'Vendidas': 0 };
-                matrizMes['Llamada'] = { 'Ingresos': 0, 'Vendidas': 0 };
-                matrizMes['Visita Obra'] = { 'Ingresos': 0, 'Vendidas': 0 };
-                matrizMes['Ferias y Eventos'] = { 'Ingresos': 0, 'Vendidas': 0 };
+                
+                if (datosDelMes.some(d => d.origen_negociacion === 'Digitales')) {
+                    matrizMes['Digitales'] = { 'Ingresos': 0, 'Vendidas': 0 };
+                }
+                if (datosDelMes.some(d => d.origen_negociacion === 'Llamada')) {
+                    matrizMes['Llamada'] = { 'Ingresos': 0, 'Vendidas': 0 };
+                }
+                if (datosDelMes.some(d => d.origen_negociacion === 'Visita Obra')) {
+                    matrizMes['Visita Obra'] = { 'Ingresos': 0, 'Vendidas': 0 };
+                }
                 
                 // Llenar datos
                 datosDelMes.forEach(row => {
