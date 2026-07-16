@@ -748,36 +748,33 @@
         }
 
         function actualizarTabla(datosFiltered) {
-            // Esta función ahora solo se llama para compatibilidad
-            // La matriz se genera desde datos.matriz_canales
-            generarMatrizCanales();
+            // Pasar datos filtrados a la matriz
+            generarMatrizCanales(datosFiltered);
         }
 
-        function generarMatrizCanales() {
+        function generarMatrizCanales(datosFiltered) {
             const container = document.getElementById('matrizCanalesContainer');
             container.innerHTML = '';
             
-            if (!datos || !datos.por_asesor_mes_origen_almacen || datos.por_asesor_mes_origen_almacen.length === 0) {
-                container.innerHTML = '<p style="color:#999">Sin datos de matriz disponibles</p>';
-                return;
-            }
-            
-            // Obtener filtros actuales
-            const asesorSeleccionado = document.getElementById('asesorFilter').value;
-            const anoSeleccionado = document.getElementById('anoFilter').value;
-            const mesSeleccionado = document.getElementById('mesFilter').value;
-            
-            // Filtrar datos según criterios
-            let datosFiltered = datos.por_asesor_mes_origen_almacen;
-            
-            if (asesorSeleccionado) {
-                datosFiltered = datosFiltered.filter(d => d.nombre_vendedor === asesorSeleccionado);
-            }
-            if (anoSeleccionado) {
-                datosFiltered = datosFiltered.filter(d => Math.floor(d.año) === parseInt(anoSeleccionado));
-            }
-            if (mesSeleccionado) {
-                datosFiltered = datosFiltered.filter(d => Math.floor(d.mes) === parseInt(mesSeleccionado));
+            // Si no se pasan datos, usar datos filtrados del DOM
+            if (!datosFiltered || datosFiltered.length === 0) {
+                const asesorSeleccionado = document.getElementById('asesorFilter').value;
+                const anoSeleccionado = document.getElementById('anoFilter').value;
+                const mesSeleccionado = document.getElementById('mesFilter').value;
+                
+                let datos_temp = datos.por_asesor_mes_origen_almacen;
+                
+                if (asesorSeleccionado) {
+                    datos_temp = datos_temp.filter(d => d.nombre_vendedor === asesorSeleccionado);
+                }
+                if (anoSeleccionado) {
+                    datos_temp = datos_temp.filter(d => Math.floor(d.año) === parseInt(anoSeleccionado));
+                }
+                if (mesSeleccionado) {
+                    datos_temp = datos_temp.filter(d => Math.floor(d.mes) === parseInt(mesSeleccionado));
+                }
+                
+                datosFiltered = datos_temp;
             }
             
             if (datosFiltered.length === 0) {
@@ -811,10 +808,8 @@
                 
                 const titulo = document.createElement('h3');
                 titulo.textContent = mesNombre;
-                if (!anoSeleccionado) {
-                    const anyoDelMes = datosDelMes[0].año;
-                    titulo.textContent += ` ${Math.floor(anyoDelMes)}`;
-                }
+                const anyoDelMes = datosDelMes[0].año;
+                titulo.textContent += ` ${Math.floor(anyoDelMes)}`;
                 titulo.style.fontSize = '14px';
                 titulo.style.fontWeight = '600';
                 titulo.style.marginBottom = '12px';
@@ -895,21 +890,12 @@
                 thTasa.style.fontSize = '12px';
                 headerRow.appendChild(thTasa);
                 
-                const thTotal = document.createElement('th');
-                thTotal.textContent = 'TOTAL';
-                thTotal.style.padding = '12px';
-                thTotal.style.textAlign = 'center';
-                thTotal.style.fontWeight = '600';
-                thTotal.style.fontSize = '12px';
-                thTotal.style.background = '#e8f0f8';
-                headerRow.appendChild(thTotal);
-                
                 thead.appendChild(headerRow);
                 table.appendChild(thead);
                 
                 const tbody = document.createElement('tbody');
-                let totalIngresos = 0;
-                let totalVendidas = 0;
+                let totalIngresosMes = 0;
+                let totalVendidasMes = 0;
                 
                 Object.keys(matrizMes).forEach(canal => {
                     const row = document.createElement('tr');
@@ -950,22 +936,56 @@
                     tdTasa.style.color = tasa >= 50 ? '#107C10' : tasa >= 25 ? '#FFB900' : '#E81123';
                     row.appendChild(tdTasa);
                     
-                    const tdTotal = document.createElement('td');
-                    tdTotal.textContent = ingresos + vendidas;
-                    tdTotal.style.padding = '12px';
-                    tdTotal.style.textAlign = 'center';
-                    tdTotal.style.fontSize = '13px';
-                    tdTotal.style.fontWeight = '700';
-                    tdTotal.style.background = '#f0f6ff';
-                    tdTotal.style.color = '#0078d4';
-                    row.appendChild(tdTotal);
-                    
                     tbody.appendChild(row);
                     
-                    totalIngresos += ingresos;
-                    totalVendidas += vendidas;
+                    totalIngresosMes += ingresos;
+                    totalVendidasMes += vendidas;
                 });
                 
+                // Agregar fila de TOTALES
+                const rowTotal = document.createElement('tr');
+                rowTotal.style.borderTop = '2px solid #0078d4';
+                rowTotal.style.borderBottom = '2px solid #0078d4';
+                rowTotal.style.background = '#f0f6ff';
+                rowTotal.style.fontWeight = '700';
+                
+                const tdTotalLabel = document.createElement('td');
+                tdTotalLabel.textContent = 'TOTAL';
+                tdTotalLabel.style.padding = '12px';
+                tdTotalLabel.style.fontSize = '13px';
+                tdTotalLabel.style.fontWeight = '700';
+                tdTotalLabel.style.color = '#0078d4';
+                rowTotal.appendChild(tdTotalLabel);
+                
+                const tdTotalIngresos = document.createElement('td');
+                tdTotalIngresos.textContent = totalIngresosMes;
+                tdTotalIngresos.style.padding = '12px';
+                tdTotalIngresos.style.textAlign = 'center';
+                tdTotalIngresos.style.fontSize = '13px';
+                tdTotalIngresos.style.fontWeight = '700';
+                tdTotalIngresos.style.color = '#0078d4';
+                rowTotal.appendChild(tdTotalIngresos);
+                
+                const tdTotalVendidas = document.createElement('td');
+                tdTotalVendidas.textContent = totalVendidasMes;
+                tdTotalVendidas.style.padding = '12px';
+                tdTotalVendidas.style.textAlign = 'center';
+                tdTotalVendidas.style.fontSize = '13px';
+                tdTotalVendidas.style.fontWeight = '700';
+                tdTotalVendidas.style.color = '#0078d4';
+                rowTotal.appendChild(tdTotalVendidas);
+                
+                const tasaTotalMes = totalIngresosMes > 0 ? (totalVendidasMes / totalIngresosMes * 100) : 0;
+                const tdTotalTasa = document.createElement('td');
+                tdTotalTasa.textContent = tasaTotalMes.toFixed(2) + '%';
+                tdTotalTasa.style.padding = '12px';
+                tdTotalTasa.style.textAlign = 'center';
+                tdTotalTasa.style.fontSize = '13px';
+                tdTotalTasa.style.fontWeight = '700';
+                tdTotalTasa.style.color = tasaTotalMes >= 50 ? '#107C10' : tasaTotalMes >= 25 ? '#FFB900' : '#E81123';
+                rowTotal.appendChild(tdTotalTasa);
+                
+                tbody.appendChild(rowTotal);
                 table.appendChild(tbody);
                 mesDiv.appendChild(table);
                 container.appendChild(mesDiv);
