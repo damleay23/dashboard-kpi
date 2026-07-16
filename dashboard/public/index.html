@@ -293,7 +293,7 @@
         </div>
 
         <div class="chart-container" id="containerTopAsesores">
-            <h2>Top 10 Asesores</h2>
+            <h2>Top 10 Asesores con más Cotizaciones</h2>
             <div class="chart-wrapper">
                 <canvas id="chartTopAsesores"></canvas>
             </div>
@@ -475,7 +475,7 @@
             });
 
             const anos = (datos.filtros.anos || [])
-                .filter(a => !isNaN(a) && a !== null && a !== undefined)
+                .filter(a => !isNaN(a) && a !== null && a !== undefined && a >= 2020)
                 .map(a => parseInt(a))
                 .filter((v, i, a) => a.indexOf(v) === i)
                 .sort((a, b) => a - b);
