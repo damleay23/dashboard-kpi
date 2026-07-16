@@ -300,22 +300,8 @@
         </div>
 
         <div class="table-container">
-            <h2>Datos Detallados</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Asesor</th>
-                        <th>Ano</th>
-                        <th>Mes</th>
-                        <th>Origen</th>
-                        <th>Almacen</th>
-                        <th>Total</th>
-                        <th>Vendidas</th>
-                        <th>Tasa %</th>
-                    </tr>
-                </thead>
-                <tbody id="dataTable"></tbody>
-            </table>
+            <h2>Matriz de Canales de Captura 2026</h2>
+            <div id="matrizCanalesContainer"></div>
         </div>
     </div>
 
@@ -762,27 +748,149 @@
         }
 
         function actualizarTabla(datosFiltered) {
-            const tbody = document.getElementById('dataTable');
-            tbody.innerHTML = '';
+            // Esta función ahora solo se llama para compatibilidad
+            // La matriz se genera desde datos.matriz_canales
+            generarMatrizCanales();
+        }
 
-            if (datosFiltered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">Sin datos</td></tr>';
+        function generarMatrizCanales() {
+            const container = document.getElementById('matrizCanalesContainer');
+            container.innerHTML = '';
+            
+            if (!datos || !datos.matriz_canales || datos.matriz_canales.length === 0) {
+                container.innerHTML = '<p style="color:#999">Sin datos de matriz disponibles</p>';
                 return;
             }
-
-            datosFiltered.slice(0, 100).forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.nombre_vendedor}</td>
-                    <td>${Math.floor(row.año)}</td>
-                    <td>${Math.floor(row.mes)}</td>
-                    <td>${row.origen_negociacion || '-'}</td>
-                    <td>${row.nombre_almacen || '-'}</td>
-                    <td>${row.total_cotizaciones}</td>
-                    <td>${row.cotizaciones_vendidas}</td>
-                    <td class="percentage-cell">${row.tasa_cierre.toFixed(2)}%</td>
-                `;
-                tbody.appendChild(tr);
+            
+            // Agrupar por mes y tipo
+            const matriz = datos.matriz_canales;
+            const mesesUnicos = [...new Set(matriz.map(r => r.mes))].sort((a, b) => a - b);
+            
+            const nombre_meses = {
+                1: "Enero", 2: "Febrero", 3: "Marzo", 4: "Abril", 5: "Mayo", 6: "Junio",
+                7: "Julio", 8: "Agosto", 9: "Septiembre", 10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+            };
+            
+            const canales = ['Visita Almacen', 'Digitales', 'Llamada', 'Visita Obra', 'Ferias y Eventos'];
+            
+            mesesUnicos.forEach(mes => {
+                const mesNombre = nombre_meses[mes] || `Mes ${mes}`;
+                
+                // Obtener filas de este mes
+                const filasDelMes = matriz.filter(r => r.mes === mes);
+                
+                if (filasDelMes.length === 0) return;
+                
+                // Crear tabla para este mes
+                const mesDiv = document.createElement('div');
+                mesDiv.style.marginBottom = '32px';
+                
+                const titulo = document.createElement('h3');
+                titulo.textContent = mesNombre + ' 2026';
+                titulo.style.fontSize = '14px';
+                titulo.style.fontWeight = '600';
+                titulo.style.marginBottom = '12px';
+                titulo.style.color = '#1a1a1a';
+                mesDiv.appendChild(titulo);
+                
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                
+                // Header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                headerRow.style.background = '#f3f5f7';
+                headerRow.style.borderBottom = '1px solid #e1e1e1';
+                
+                const thTipo = document.createElement('th');
+                thTipo.textContent = 'Tipo';
+                thTipo.style.padding = '12px';
+                thTipo.style.textAlign = 'left';
+                thTipo.style.fontWeight = '600';
+                thTipo.style.fontSize = '12px';
+                headerRow.appendChild(thTipo);
+                
+                canales.forEach(canal => {
+                    const th = document.createElement('th');
+                    th.textContent = canal;
+                    th.style.padding = '12px';
+                    th.style.textAlign = 'center';
+                    th.style.fontWeight = '600';
+                    th.style.fontSize = '12px';
+                    headerRow.appendChild(th);
+                });
+                
+                const thTotal = document.createElement('th');
+                thTotal.textContent = 'TOTAL';
+                thTotal.style.padding = '12px';
+                thTotal.style.textAlign = 'center';
+                thTotal.style.fontWeight = '600';
+                thTotal.style.fontSize = '12px';
+                thTotal.style.background = '#e8f0f8';
+                headerRow.appendChild(thTotal);
+                
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Body
+                const tbody = document.createElement('tbody');
+                
+                filasDelMes.forEach(fila => {
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid #f3f5f7';
+                    
+                    const tdTipo = document.createElement('td');
+                    tdTipo.textContent = fila.tipo;
+                    tdTipo.style.padding = '12px';
+                    tdTipo.style.fontSize = '13px';
+                    tdTipo.style.fontWeight = '600';
+                    tdTipo.style.color = fila.tipo === 'Tasa Cierre (%)' ? '#0078d4' : '#1a1a1a';
+                    row.appendChild(tdTipo);
+                    
+                    let totalFila = 0;
+                    
+                    canales.forEach(canal => {
+                        const td = document.createElement('td');
+                        const valor = fila[canal] || 0;
+                        td.textContent = valor;
+                        td.style.padding = '12px';
+                        td.style.textAlign = 'center';
+                        td.style.fontSize = '13px';
+                        
+                        // Colorear según tipo
+                        if (fila.tipo === 'Tasa Cierre (%)') {
+                            td.textContent = valor.toFixed(2) + '%';
+                            td.style.color = valor >= 50 ? '#107C10' : valor >= 25 ? '#FFB900' : '#E81123';
+                            td.style.fontWeight = '600';
+                        }
+                        
+                        totalFila += valor;
+                        row.appendChild(td);
+                    });
+                    
+                    const tdTotal = document.createElement('td');
+                    tdTotal.style.padding = '12px';
+                    tdTotal.style.textAlign = 'center';
+                    tdTotal.style.fontSize = '13px';
+                    tdTotal.style.fontWeight = '700';
+                    tdTotal.style.background = '#f0f6ff';
+                    
+                    if (fila.tipo === 'Tasa Cierre (%)') {
+                        tdTotal.textContent = fila.TOTAL.toFixed(2) + '%';
+                        tdTotal.style.color = '#0078d4';
+                    } else {
+                        tdTotal.textContent = fila.TOTAL;
+                        tdTotal.style.color = '#0078d4';
+                    }
+                    
+                    row.appendChild(tdTotal);
+                    tbody.appendChild(row);
+                });
+                
+                table.appendChild(tbody);
+                mesDiv.appendChild(table);
+                container.appendChild(mesDiv);
             });
         }
 

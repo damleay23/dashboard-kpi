@@ -145208,4 +145208,238 @@ const DATOS_DASHBOARD = {
     "mes_nombre": "Julio"
   }
 ]
+,
+    matriz_canales: [
+  {
+    "mes": 1.0,
+    "mes_nombre": "Enero",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 247,
+    "Digitales": 239,
+    "Llamada": 92,
+    "Visita Obra": 150,
+    "Ferias y Eventos": 0,
+    "TOTAL": 728
+  },
+  {
+    "mes": 1.0,
+    "mes_nombre": "Enero",
+    "tipo": "Vendidas",
+    "Visita Almacen": 66,
+    "Digitales": 7,
+    "Llamada": 26,
+    "Visita Obra": 6,
+    "Ferias y Eventos": 0,
+    "TOTAL": 105
+  },
+  {
+    "mes": 1.0,
+    "mes_nombre": "Enero",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 26.72,
+    "Digitales": 2.93,
+    "Llamada": 28.26,
+    "Visita Obra": 4.0,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 14.42
+  },
+  {
+    "mes": 2.0,
+    "mes_nombre": "Febrero",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 159,
+    "Digitales": 189,
+    "Llamada": 71,
+    "Visita Obra": 116,
+    "Ferias y Eventos": 0,
+    "TOTAL": 535
+  },
+  {
+    "mes": 2.0,
+    "mes_nombre": "Febrero",
+    "tipo": "Vendidas",
+    "Visita Almacen": 46,
+    "Digitales": 8,
+    "Llamada": 27,
+    "Visita Obra": 3,
+    "Ferias y Eventos": 0,
+    "TOTAL": 84
+  },
+  {
+    "mes": 2.0,
+    "mes_nombre": "Febrero",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 28.93,
+    "Digitales": 4.23,
+    "Llamada": 38.03,
+    "Visita Obra": 2.59,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 15.7
+  },
+  {
+    "mes": 3.0,
+    "mes_nombre": "Marzo",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 147,
+    "Digitales": 541,
+    "Llamada": 82,
+    "Visita Obra": 120,
+    "Ferias y Eventos": 0,
+    "TOTAL": 890
+  },
+  {
+    "mes": 3.0,
+    "mes_nombre": "Marzo",
+    "tipo": "Vendidas",
+    "Visita Almacen": 40,
+    "Digitales": 6,
+    "Llamada": 29,
+    "Visita Obra": 1,
+    "Ferias y Eventos": 0,
+    "TOTAL": 76
+  },
+  {
+    "mes": 3.0,
+    "mes_nombre": "Marzo",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 27.21,
+    "Digitales": 1.11,
+    "Llamada": 35.37,
+    "Visita Obra": 0.83,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 8.54
+  },
+  {
+    "mes": 4.0,
+    "mes_nombre": "Abril",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 179,
+    "Digitales": 741,
+    "Llamada": 62,
+    "Visita Obra": 156,
+    "Ferias y Eventos": 0,
+    "TOTAL": 1138
+  },
+  {
+    "mes": 4.0,
+    "mes_nombre": "Abril",
+    "tipo": "Vendidas",
+    "Visita Almacen": 36,
+    "Digitales": 8,
+    "Llamada": 19,
+    "Visita Obra": 2,
+    "Ferias y Eventos": 0,
+    "TOTAL": 65
+  },
+  {
+    "mes": 4.0,
+    "mes_nombre": "Abril",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 20.11,
+    "Digitales": 1.08,
+    "Llamada": 30.65,
+    "Visita Obra": 1.28,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 5.71
+  },
+  {
+    "mes": 5.0,
+    "mes_nombre": "Mayo",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 142,
+    "Digitales": 587,
+    "Llamada": 56,
+    "Visita Obra": 83,
+    "Ferias y Eventos": 0,
+    "TOTAL": 868
+  },
+  {
+    "mes": 5.0,
+    "mes_nombre": "Mayo",
+    "tipo": "Vendidas",
+    "Visita Almacen": 28,
+    "Digitales": 10,
+    "Llamada": 21,
+    "Visita Obra": 1,
+    "Ferias y Eventos": 0,
+    "TOTAL": 60
+  },
+  {
+    "mes": 5.0,
+    "mes_nombre": "Mayo",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 19.72,
+    "Digitales": 1.7,
+    "Llamada": 37.5,
+    "Visita Obra": 1.2,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 6.91
+  },
+  {
+    "mes": 6.0,
+    "mes_nombre": "Junio",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 134,
+    "Digitales": 521,
+    "Llamada": 18,
+    "Visita Obra": 146,
+    "Ferias y Eventos": 0,
+    "TOTAL": 819
+  },
+  {
+    "mes": 6.0,
+    "mes_nombre": "Junio",
+    "tipo": "Vendidas",
+    "Visita Almacen": 14,
+    "Digitales": 4,
+    "Llamada": 2,
+    "Visita Obra": 0,
+    "Ferias y Eventos": 0,
+    "TOTAL": 20
+  },
+  {
+    "mes": 6.0,
+    "mes_nombre": "Junio",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 10.45,
+    "Digitales": 0.77,
+    "Llamada": 11.11,
+    "Visita Obra": 0.0,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 2.44
+  },
+  {
+    "mes": 7.0,
+    "mes_nombre": "Julio",
+    "tipo": "Ingresos/Cotizaciones",
+    "Visita Almacen": 43,
+    "Digitales": 94,
+    "Llamada": 7,
+    "Visita Obra": 85,
+    "Ferias y Eventos": 0,
+    "TOTAL": 229
+  },
+  {
+    "mes": 7.0,
+    "mes_nombre": "Julio",
+    "tipo": "Vendidas",
+    "Visita Almacen": 5,
+    "Digitales": 0,
+    "Llamada": 2,
+    "Visita Obra": 0,
+    "Ferias y Eventos": 0,
+    "TOTAL": 7
+  },
+  {
+    "mes": 7.0,
+    "mes_nombre": "Julio",
+    "tipo": "Tasa Cierre (%)",
+    "Visita Almacen": 11.63,
+    "Digitales": 0.0,
+    "Llamada": 28.57,
+    "Visita Obra": 0.0,
+    "Ferias y Eventos": 0.0,
+    "TOTAL": 3.06
+  }
+]
 };
