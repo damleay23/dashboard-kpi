@@ -1,99 +1,79 @@
 {
   "REGIÓN NORTE": {
     "ALM. QUITO": [
-      "ANDREA GUAMAN",
-      "Ana Bonilla",
-      "Ana Isabel Carvallo",
-      "Andrés Vivanco",
-      "BERMUDEZ  EUNICE",
-      "Carolina Rodríguez",
-      "Damaris Vera",
-      "Daniela Reyes",
-      "Diana Alastre",
-      "Erika Parra",
-      "Fernando Toasa",
-      "JAMA LUISA",
-      "LUCENA YHENNIFER",
       "Paola Haro",
-      "Tatiana Paredes"
+      "Ana Bonilla",
+      "Diana Alastre",
+      "JAMA LUISA",
+      "Ana Isabel Carvallo",
+      "Carolina Rodríguez",
+      "Tatiana Paredes",
+      "Andrés Vivanco",
+      "Erika Parra",
+      "Daniela Reyes",
+      "Damaris Vera"
     ],
     "ALM. CUMBAYA": [
-      "ARQ SANTIAGO BUENDIA",
-      "DAVILA NAVEDA MARIA JOSE",
-      "Damaris Vera",
-      "Gloria Jijon",
-      "JAMA LUISA",
-      "JANNETH BERNAL",
-      "LOPEZ SAMIRA",
-      "NIEVES IRIANNE",
-      "Santiago Buendía",
       "Stephanie Carrillo",
-      "William Tuquerres"
+      "ARQ SANTIAGO BUENDIA",
+      "JAMA LUISA",
+      "DAVILA NAVEDA MARIA JOSE",
+      "Gloria Jijon",
+      "NIEVES IRIANNE"
     ],
     "BODEGA SANGOLQUI": [
-      "Alison Lema",
-      "Andrea Guamán",
-      "Dalila Lema",
-      "Daysi Collaguazo",
       "HINOJOSA PATRICIA",
-      "Juan Rojano",
+      "Dalila Lema",
+      "Andrea Guamán",
+      "Daysi Collaguazo",
+      "Patricia Espin",
       "Karina Sanchez",
-      "Luis Farinango",
-      "Patricia Espin"
+      "Alison Lema"
     ]
   },
   "REGIÓN CENTRO": {
     "ALM. AMBATO": [
-      "ALEXANDRA ALBAN",
-      "Andres Patiag",
-      "CASTRO GISSEL",
-      "Cristina Acosta",
-      "Evelyn Tiban",
-      "Gissela Toscano",
-      "Jazmina Santamaría",
-      "Lizeth Vargas",
-      "MA BELEN TABOADA",
-      "Maria Jose Andrade",
       "NARANJO FERNANDO",
-      "Sebastian Marcial",
+      "Jazmina Santamaría",
+      "CASTRO GISSEL",
       "Soledad Tabares",
-      "Vanessa Rodriguez"
+      "Gissela Toscano",
+      "Sebastian Marcial",
+      "Maria Jose Andrade",
+      "Vanessa Rodriguez",
+      "Evelyn Tiban",
+      "Cristina Acosta",
+      "Lizeth Vargas",
+      "ALEXANDRA ALBAN"
     ],
-    "ALM. EL CARACOL": []
+    "ALM. EL CARACOL": [],
+    "ALM. CUENCA REMIGIO": []
   },
   "REGIÓN SUR": {
     "ALM. FABRICA DURAMAS": [
-      "ANTHONY SIMBAÑA",
-      "ARQ OLEAS EDUARDO",
-      "Alejandro Garcia",
-      "Alicia Minchalo",
-      "Andrea Marca",
-      "Belen Astudillo",
-      "Diego Toalongo",
-      "Eduardo Oleas",
-      "José Ramirez",
-      "Kevin Valdez",
       "Lourdes Alvarado",
-      "Miguel Juela",
-      "Miguel Santos",
-      "Ventas Fabrica"
+      "Belen Astudillo",
+      "Alejandro Garcia",
+      "ARQ OLEAS EDUARDO"
     ],
     "ALM. ORDOÑEZ LASSO": [
-      "Adrian Ríos",
-      "Belén Morales",
-      "DAVID RAMON",
-      "Demo",
-      "Galo Velecela",
-      "JANNETH LUNA",
-      "Karla Saldaña",
       "MERCY VELEZ",
-      "Marcelo Vasquez",
-      "Mercy Velez O",
-      "NIETO JUAN"
+      "Belén Morales"
     ]
   },
   "REGIÓN COSTA CENTRO": {
-    "ALM. JUAN TANCA MARENGO": [],
+    "ALM. JUAN TANCA MARENGO": [
+      "Verónica García",
+      "SALTO NUBIA",
+      "Arianna Quimi",
+      "Carolina Lino",
+      "Rossy Drew Alarcón",
+      "Patricia Briones",
+      "Blanca Criollo",
+      "Lisseth Tenemaza",
+      "Xavier Rodriguez",
+      "Danny Leon"
+    ],
     "ALM. PLAZA PROYECTA": [
       "Keyla Cárdenas"
     ],
@@ -103,14 +83,13 @@
   },
   "REGIÓN COSTA NORTE": {
     "ALM. MANTA": [
-      "Byron España",
-      "Diana Arias",
-      "Ernesto Carvache",
-      "Jorge Bonilla",
-      "Karen Espinoza",
       "Maria Morena de la Fuente",
-      "Stalin Araujo",
-      "Stephanie García"
+      "Ernesto Carvache",
+      "Diana Arias",
+      "Jorge Bonilla",
+      "Stephanie García",
+      "Karen Espinoza",
+      "Byron España"
     ]
   }
 }
